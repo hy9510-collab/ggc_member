@@ -1,286 +1,92 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>의원 의정활동 지원 시스템</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>의원 의정활동 보고자료 관리 시스템</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-body{margin:0;font-family:Malgun Gothic,Noto Sans KR,sans-serif;background:#eef3f8;color:#172033}
-header{background:#14356b;color:white;padding:18px 22px}
-h1{margin:0;font-size:24px} .sub{margin:6px 0 0;color:#dbe8f7;font-size:14px}
-.wrap{display:grid;grid-template-columns:240px 1fr;gap:14px;padding:14px}
-aside,main{background:white;border:1px solid #d7e0ec;border-radius:10px;padding:14px}
-button,input,textarea,select{font:inherit}
-button{border:0;border-radius:8px;background:#14356b;color:white;padding:9px 12px;font-weight:700;cursor:pointer}
-button.subbtn{background:#edf3fa;color:#14356b}
-button.danger{background:#fff0f2;color:#b4233a}
-.nav button{display:block;width:100%;margin:0 0 7px;text-align:left}
-.nav button.active{background:#2563a8}
-section{display:none}.activeSec{display:block}
-label{font-weight:700;display:block;margin:10px 0 5px}
-input,textarea,select{width:100%;box-sizing:border-box;border:1px solid #ccd7e6;border-radius:8px;padding:9px}
-textarea{min-height:78px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{border:1px solid #d7e0ec;padding:8px;text-align:left;vertical-align:top;font-size:13px}
-th{background:#f0f4fa}
-.card{border:1px solid #d7e0ec;border-radius:10px;padding:12px;margin:8px 0;background:#fbfcfe}
-.pill{display:inline-block;background:#edf3fa;border-radius:999px;padding:3px 8px;margin:2px;font-size:12px;font-weight:700}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-.report{background:white;border:1px solid #d7e0ec;border-radius:10px;padding:14px;line-height:1.6}
-.notice{background:#f5f9ff;border:1px solid #cfe0f6;border-radius:9px;padding:10px;margin:8px 0 12px;font-size:13px}
-@media(max-width:850px){.wrap,.grid2,.grid3{grid-template-columns:1fr}}
-@media print{header,aside,.noPrint{display:none}.wrap{display:block;padding:0}main{border:0}.report{border:0}}
+:root{--navy:#14356b;--blue:#2563a8;--bg:#eef3f8;--line:#d7e0ec;--soft:#f5f9ff;--text:#172033}
+*{box-sizing:border-box}body{margin:0;font-family:Malgun Gothic,Noto Sans KR,Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:var(--navy);color:white;padding:18px 22px}h1{margin:0;font-size:24px}h2{margin:4px 0 16px;font-size:25px}h3{margin:16px 0 10px}
+.sub{margin:6px 0 0;color:#dbe8f7;font-size:14px}.topMember{margin-top:14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.topMember label{margin:0;color:white;font-weight:700}.topMember select{max-width:360px;background:white;color:var(--text)}
+.wrap{display:grid;grid-template-columns:245px 1fr;gap:14px;padding:14px}aside,main{background:white;border:1px solid var(--line);border-radius:10px;padding:14px}
+button,input,textarea,select{font:inherit}button{border:0;border-radius:8px;background:var(--navy);color:white;padding:9px 12px;font-weight:700;cursor:pointer}button.subbtn{background:#edf3fa;color:var(--navy)}button.danger{background:#fff0f2;color:#b4233a}button.ok{background:#156f3e}.nav button{display:block;width:100%;margin:0 0 7px;text-align:left}.nav button.active{background:var(--blue)}
+section{display:none}.activeSec{display:block}label{font-weight:700;display:block;margin:10px 0 5px}input,textarea,select{width:100%;border:1px solid #ccd7e6;border-radius:8px;padding:9px;background:white}textarea{min-height:82px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top;font-size:13px}th{background:#f0f4fa}
+.card{border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0;background:#fbfcfe}.stat{font-size:28px;font-weight:800;color:var(--navy)}
+.pill{display:inline-block;background:#edf3fa;border-radius:999px;padding:3px 8px;margin:2px;font-size:12px;font-weight:700;color:#14356b}.pill.red{background:#fff0f2;color:#b4233a}.pill.green{background:#eaf7ef;color:#156f3e}.pill.yellow{background:#fff8e5;color:#8a5a00}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.report{background:white;border:1px solid var(--line);border-radius:10px;padding:16px;line-height:1.65;min-height:260px}.report:focus{outline:2px solid #8bb8f4}.notice{background:var(--soft);border:1px solid #cfe0f6;border-radius:9px;padding:10px;margin:8px 0 12px;font-size:13px}.small{font-size:12px;color:#637083}.authBox{background:#f6fbf7;border:1px solid #cfe8d7;border-radius:10px;padding:12px}.copyBox{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;line-height:1.6}
+@media(max-width:950px){.wrap,.grid2,.grid3,.grid4{grid-template-columns:1fr}}@media print{header,aside,.noPrint{display:none!important}.wrap{display:block;padding:0}main{border:0}.report{border:0}}
 </style>
 </head>
 <body>
 <header>
-<h1>의원 의정활동 지원 시스템</h1>
-<p class="sub">의원별 지역현안·공약·민원·활동자료를 누적 관리하고 1쪽 보고서를 생성합니다.</p>
+<h1>의원 의정활동 보고자료 관리 시스템</h1>
+<p class="sub">의원별 지역현안·공약·민원·활동자료를 누적 관리하고, 향후 의정활동보고서 작성의 기본 자료로 활용합니다.</p>
+<div class="topMember noPrint"><label for="currentMember">의원 선택</label><select id="currentMember" onchange="render()"></select><span id="cloudBadge" class="pill yellow">로컬 저장</span><span class="small" style="color:#dbe8f7">선택한 의원 기준으로 현황·보고서 자료함·보고서를 확인합니다.</span></div>
 </header>
-
 <div class="wrap">
-<aside class="noPrint">
-<div class="nav">
-<button onclick="show('memberPage')" class="active">의원별 페이지</button>
-<button onclick="show('members')">의원 관리</button>
-<button onclick="show('input')">자료 입력</button>
-<button onclick="show('list')">전체 목록</button>
-<button onclick="show('report')">보고서</button>
-<button onclick="show('backup')">백업/복원</button>
-</div>
-<div class="card">
-<label>의원 선택</label>
-<select id="currentMember" onchange="render()"></select>
-</div>
-</aside>
-
+<aside class="noPrint"><div class="nav">
+<button onclick="show('memberPage',this)" class="active">의원별 페이지</button><button onclick="show('members',this)">의원 관리</button><button onclick="show('input',this)">자료 입력</button><button onclick="show('reportSource',this)">보고서 자료함</button><button onclick="show('list',this)">전체 목록</button><button onclick="show('report',this)">보고서</button><button onclick="show('backup',this)">백업/복원</button><button onclick="show('supabasePage',this)">Supabase 설정</button>
+</div><div class="card"><b>업무 흐름</b><p class="small">의원 등록 → 자료 입력 → 보고서 자료함 선별 → 보고서 초안 생성 → 수정본 저장</p></div></aside>
 <main>
 <section id="memberPage" class="activeSec">
 <h2>의원별 페이지</h2>
+<div class="notice">이 시스템은 의원별 지역현안, 공약, 민원, 의정활동 자료를 누적 관리하여 의정활동보고서, 보도자료, 카드뉴스, 질의자료 작성의 기초자료로 활용하기 위한 정책지원관 업무지원 페이지입니다.</div>
+<div class="card"><h3>의원별 의정활동 지원 기본방향</h3><table><tr><th style="width:180px">방향</th><th>내용</th></tr><tr><td><b>빠른 적응 지원</b></td><td>상임위 구조, 기관, 예산, 회기 일정 이해 지원</td></tr><tr><td><b>지역 현안 연결</b></td><td>의원 지역구와 문화·체육·관광 정책을 연결</td></tr><tr><td><b>대표 정책 발굴</b></td><td>의원별 상징성 있는 조례·발언·토론회 주제 제안</td></tr><tr><td><b>홍보 기반 마련</b></td><td>보도자료, 카드뉴스, SNS 메시지까지 연계</td></tr><tr><td><b>관계망 구축</b></td><td>집행부, 산하기관, 지역단체와의 협의 채널 정리</td></tr></table></div>
 <div id="memberSummary"></div>
 </section>
-
 <section id="members">
-<h2>의원 관리</h2>
-<div class="grid2">
-<div>
-<input id="memberId" type="hidden">
-<label>의원명</label><input id="memberName">
-<label>정당</label><input id="memberParty">
-<label>지역구</label><input id="memberArea" placeholder="예: 남양주3, 진접 / 오산">
-<label>관심분야</label><textarea id="memberInterest"></textarea>
-<label>자료 선호·유의사항</label><textarea id="memberNote"></textarea>
-<div class="toolbar">
-<button onclick="saveMember()">의원 저장</button>
-<button class="subbtn" onclick="clearMember()">초기화</button>
-</div>
-</div>
-<div>
-<h3>등록 의원</h3>
-<div id="memberList"></div>
-</div>
-</div>
+<h2>의원 관리</h2><div class="grid2"><div>
+<input id="memberId" type="hidden"><label>의원명</label><input id="memberName" placeholder="예: ○○○ 의원"><div class="grid2"><div><label>정당</label><input id="memberParty"></div><div><label>상임위</label><input id="memberCommittee" placeholder="예: 문화체육관광위원회"></div></div><label>지역구</label><input id="memberArea" placeholder="예: 남양주3, 진접 / 오산"><label>주요 관심분야</label><textarea id="memberInterest" placeholder="문화공간, 생활체육, 관광, 지역축제 등"></textarea><label>정책지원 방향</label><textarea id="memberPolicyDirection" placeholder="의원별 중점 지원 방향"></textarea><label>자료 선호·유의사항</label><textarea id="memberNote" placeholder="보고 방식, 일정, 우선순위 등"></textarea><div class="toolbar"><button onclick="saveMember()">의원 저장</button><button class="subbtn" onclick="clearMember()">초기화</button></div>
+</div><div><h3>등록 의원</h3><div id="memberList"></div></div></div>
 </section>
-
 <section id="input">
-<h2>자료 입력</h2>
-<div class="notice">민원은 개인정보를 넣지 말고 민원번호·요지·지역·부서·처리상태 중심으로 기록하세요.</div>
-<input id="itemId" type="hidden">
-<div class="grid3">
-<div><label>의원</label><select id="itemMember"></select></div>
-<div><label>구분</label><select id="itemType"><option>지역현안</option><option>공약</option><option>민원</option><option>활동자료</option></select></div>
-<div><label>상태</label><select id="itemStatus"><option>자료수집 전</option><option>검토중</option><option>진행중</option><option>답변대기</option><option>완료</option><option>보류</option></select></div>
-</div>
-<label>제목</label><input id="itemTitle">
-<div class="grid3">
-<div><label>관련 지역</label><input id="itemArea"></div>
-<div><label>분야</label><select id="itemField"><option>문화정책</option><option>관광정책</option><option>체육정책</option><option>문화유산</option><option>콘텐츠·예술</option><option>예산·결산</option><option>행정사무감사</option><option>기타</option></select></div>
-<div><label>우선순위</label><select id="itemPriority"><option>상</option><option>중</option><option>하</option></select></div>
-</div>
-<label>내용</label><textarea id="itemBody" placeholder="현안 배경, 공약 원문, 민원 요지, 활동내용 등을 입력"></textarea>
-<div class="grid2">
-<div><label>필요자료·확인사항</label><textarea id="itemNeed"></textarea></div>
-<div><label>후속조치·의정활동 연결</label><textarea id="itemAction" placeholder="자료요구, 질의서, 5분발언, 조례, 간담회, 현장방문 등"></textarea></div>
-</div>
-<div class="grid3">
-<div><label>관련 부서·기관</label><input id="itemDept"></div>
-<div><label>출처 URL·파일명</label><input id="itemSource"></div>
-<div><label>태그</label><input id="itemTags"></div>
-</div>
-<div class="toolbar">
-<button onclick="saveItem()">자료 저장</button>
-<button class="subbtn" onclick="clearItem()">초기화</button>
-</div>
+<h2>자료 입력</h2><div class="notice">의정활동보고서에 바로 활용할 수 있도록 <b>활동일자, 활동유형, 핵심 성과, 주민 체감 효과, 향후 계획</b>을 함께 입력하세요.</div>
+<input id="itemId" type="hidden"><div class="grid4"><div><label>의원</label><select id="itemMember"></select></div><div><label>구분</label><select id="itemType"><option>지역현안</option><option>공약</option><option>민원</option><option>활동자료</option><option>보고서소재</option></select></div><div><label>활동일자</label><input id="activityDate" type="date"></div><div><label>상태</label><select id="itemStatus"><option>자료수집 전</option><option>검토중</option><option>진행중</option><option>답변대기</option><option>완료</option><option>보류</option></select></div></div>
+<label>제목</label><input id="itemTitle" placeholder="예: ○○지역 문화공간 확충 현장방문">
+<div class="grid4"><div><label>활동유형</label><select id="activityType"><option>자료수집</option><option>자료요구</option><option>질의서</option><option>5분발언</option><option>조례</option><option>토론회</option><option>간담회</option><option>현장방문</option><option>보도자료</option><option>카드뉴스</option><option>예산·결산심사</option><option>행정사무감사</option><option>기타</option></select></div><div><label>관련 지역</label><input id="itemArea"></div><div><label>분야</label><select id="itemField"><option>문화정책</option><option>관광정책</option><option>체육정책</option><option>문화유산</option><option>콘텐츠·예술</option><option>예산·결산</option><option>행정사무감사</option><option>복지·교육 연계</option><option>기타</option></select></div><div><label>우선순위</label><select id="itemPriority"><option>상</option><option>중</option><option>하</option></select></div></div>
+<label>추진 배경·내용</label><textarea id="itemBody" placeholder="현안 배경, 공약 원문, 민원 요지, 활동내용 등을 입력"></textarea>
+<div class="grid2"><div><label>핵심 성과</label><textarea id="coreAchievement" placeholder="보고서에 들어갈 대표 성과 문장"></textarea></div><div><label>주민 체감 효과</label><textarea id="residentEffect" placeholder="도민·주민에게 어떤 변화가 기대되는지"></textarea></div></div>
+<div class="grid2"><div><label>필요자료·확인사항</label><textarea id="itemNeed"></textarea></div><div><label>후속조치·의정활동 연결</label><textarea id="itemAction" placeholder="자료요구, 질의서, 5분발언, 조례, 간담회, 현장방문 등"></textarea></div></div>
+<div class="grid2"><div><label>담당 부서 답변</label><textarea id="deptResponse" placeholder="담당 부서 확인 결과, 답변 요지"></textarea></div><div><label>향후 계획</label><textarea id="futurePlan" placeholder="다음 회기, 예산 반영, 부서협의, 현장방문 등"></textarea></div></div>
+<div class="grid3"><div><label>관련 부서·기관</label><input id="itemDept"></div><div><label>출처 URL·파일명</label><input id="itemSource"></div><div><label>사진·홍보자료 링크</label><input id="mediaLinks"></div></div>
+<div class="grid3"><div><label>태그</label><input id="itemTags" placeholder="예: 북부, 문화공간, 예산"></div><div><label>보고서 반영</label><select id="reportReflected"><option>미반영</option><option>반영대상</option><option>반영완료</option></select></div><div><label>보고서 자료함 포함</label><select id="reportReady"><option value="true">포함</option><option value="false">제외</option></select></div></div>
+<div class="toolbar"><button onclick="saveItem()">자료 저장</button><button class="subbtn" onclick="clearItem()">초기화</button></div>
 </section>
-
+<section id="reportSource">
+<h2>보고서 자료함</h2><div class="notice">`자료 입력`에서 보고서 자료함 포함을 선택한 자료만 모아 보여줍니다. 이 화면의 내용을 복사해 의정활동보고서, 보도자료, 카드뉴스 초안에 활용할 수 있습니다.</div>
+<div class="toolbar noPrint"><select id="sourceMember" onchange="renderReportSource()"></select><button onclick="buildReportSourceText()">보고서용 문장 만들기</button><button class="subbtn" onclick="copySourceText()">보고서용 문장 복사</button></div><div id="reportSourceList"></div><h3>보고서 작성용 정리문</h3><div id="sourceText" class="copyBox">의원을 선택하고 `보고서용 문장 만들기`를 누르세요.</div>
+</section>
 <section id="list">
-<h2>전체 목록</h2>
-<div class="grid3 noPrint">
-<div><label>의원 필터</label><select id="filterMember" onchange="renderList()"></select></div>
-<div><label>구분 필터</label><select id="filterType" onchange="renderList()"><option value="">전체</option><option>지역현안</option><option>공약</option><option>민원</option><option>활동자료</option></select></div>
-<div><label>검색어</label><input id="keyword" oninput="renderList()"></div>
-</div>
-<div id="itemList"></div>
+<h2>전체 목록</h2><div class="grid4 noPrint"><div><label>의원 필터</label><select id="filterMember" onchange="renderList()"></select></div><div><label>구분 필터</label><select id="filterType" onchange="renderList()"><option value="">전체</option><option>지역현안</option><option>공약</option><option>민원</option><option>활동자료</option><option>보고서소재</option></select></div><div><label>보고서 반영</label><select id="filterReport" onchange="renderList()"><option value="">전체</option><option>미반영</option><option>반영대상</option><option>반영완료</option></select></div><div><label>검색어</label><input id="keyword" oninput="renderList()"></div></div><div id="itemList"></div>
 </section>
-
 <section id="report">
-<h2>보고서</h2>
-<div class="toolbar noPrint">
-<select id="reportMember"></select>
-<button onclick="makeReport()">의정활동 1쪽 보고 생성</button>
-<button class="subbtn" onclick="copyReport()">보고서 복사</button>
-<button class="subbtn" onclick="window.print()">PDF 저장/인쇄</button>
-</div>
-<div id="reportBox" class="report">의원을 선택하고 보고서를 생성하세요.</div>
+<h2>보고서</h2><div class="notice">초안 생성 후 본문을 직접 클릭해 수정할 수 있습니다. 수정본은 의원별로 저장됩니다.</div><div class="toolbar noPrint"><select id="reportMember"></select><button onclick="makeReport()">의정활동 보고서 초안 생성</button><button class="subbtn" onclick="saveEditedReport()">수정본 저장</button><button class="subbtn" onclick="loadEditedReport()">수정본 불러오기</button><button class="subbtn" onclick="copyReport()">보고서 복사</button><button class="subbtn" onclick="window.print()">PDF 저장/인쇄</button></div><div id="reportBox" class="report" contenteditable="true" oninput="autoSaveReport()">의원을 선택하고 보고서를 생성하세요.</div>
 </section>
-
 <section id="backup">
-<h2>백업/복원</h2>
-<div class="notice">자료는 현재 브라우저에 저장됩니다. 중요한 자료는 반드시 백업하세요.</div>
-<div class="toolbar">
-<button onclick="exportData()">자료 백업</button>
-<button class="subbtn" onclick="document.getElementById('importFile').click()">자료 복원</button>
-<input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)">
-</div>
+<h2>백업/복원</h2><div class="notice">Supabase 연결 전에는 브라우저에 저장됩니다. 연결 후에도 중요한 자료는 JSON 백업을 함께 보관하세요.</div><div class="toolbar"><button onclick="exportData()">자료 백업</button><button class="subbtn" onclick="document.getElementById('importFile').click()">자료 복원</button><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"></div>
 </section>
-</main>
-</div>
-
+<section id="supabasePage">
+<h2>Supabase 설정</h2><div class="notice">Supabase에 연결하면 입력자료를 브라우저가 아니라 Supabase DB에 저장할 수 있습니다. <b>service_role key는 절대 넣지 말고 anon/public key만 입력</b>하세요.</div>
+<div class="grid2"><div class="card"><h3>1. 연결 정보</h3><label>Supabase Project URL</label><input id="supabaseUrl" placeholder="https://xxxx.supabase.co"><label>Supabase anon/public key</label><input id="supabaseAnonKey" placeholder="eyJ..."><div class="toolbar"><button onclick="saveSupabaseConfig()">연결정보 저장</button><button class="subbtn" onclick="testSupabase()">연결 테스트</button></div><p id="supabaseStatus" class="small">연결 전</p></div>
+<div class="authBox"><h3>2. 로그인</h3><label>이메일</label><input id="authEmail" type="email"><label>비밀번호</label><input id="authPassword" type="password"><div class="toolbar"><button onclick="signUp()">회원가입</button><button class="ok" onclick="signIn()">로그인</button><button class="subbtn" onclick="signOut()">로그아웃</button></div><p id="authStatus" class="small">로그인 전</p></div></div>
+<div class="card"><h3>3. 동기화</h3><p class="small">로컬 자료를 Supabase로 올리거나, Supabase 자료를 현재 브라우저로 불러옵니다.</p><div class="toolbar"><button onclick="syncToCloud()">현재 자료를 Supabase에 저장</button><button class="subbtn" onclick="syncFromCloud()">Supabase에서 불러오기</button></div></div>
+</section>
+</main></div>
 <script>
-const KEY="ggcMemberSupportData";
-let data=load();
-
-function load(){
-  try{return JSON.parse(localStorage.getItem(KEY))||{members:[],items:[]}}
-  catch{return{members:[],items:[]}}
-}
-function save(){localStorage.setItem(KEY,JSON.stringify(data))}
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
-function h(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function today(){return new Date().toISOString().slice(0,10)}
-
-function show(id){
- document.querySelectorAll("section").forEach(s=>s.classList.remove("activeSec"));
- document.getElementById(id).classList.add("activeSec");
- document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
- event.target.classList.add("active");
- render();
-}
-
-function render(){
- renderSelects(); renderMembers(); renderList(); renderMemberSummary();
-}
-function memberName(id){return data.members.find(m=>m.id===id)?.name||"미지정"}
-function selectedMember(){return document.getElementById("currentMember").value||data.members[0]?.id||""}
-function renderSelects(){
- const opts=data.members.map(m=>`<option value="${m.id}">${h(m.name)} (${h(m.area||"지역 미입력")})</option>`).join("");
- ["currentMember","itemMember","filterMember","reportMember"].forEach(id=>{
-   const el=document.getElementById(id); if(!el)return;
-   const cur=el.value;
-   el.innerHTML=(id==="filterMember"?'<option value="">전체</option>':"")+opts;
-   el.value=cur||selectedMember();
- });
-}
-
-function saveMember(){
- const id=document.getElementById("memberId").value||uid();
- const m={id,name:memberNameInput.value.trim(),party:memberParty.value.trim(),area:memberArea.value.trim(),interest:memberInterest.value.trim(),note:memberNote.value.trim()};
- if(!m.name){alert("의원명을 입력하세요.");return}
- const idx=data.members.findIndex(x=>x.id===id);
- if(idx>=0)data.members[idx]=m; else data.members.push(m);
- save(); clearMember(); render();
-}
-function editMember(id){
- const m=data.members.find(x=>x.id===id); if(!m)return;
- memberId.value=m.id; memberNameInput.value=m.name; memberParty.value=m.party||""; memberArea.value=m.area||""; memberInterest.value=m.interest||""; memberNote.value=m.note||"";
- showById("members");
-}
-function deleteMember(id){
- if(!confirm("의원을 삭제할까요? 자료는 남지만 의원명이 미지정으로 표시될 수 있습니다."))return;
- data.members=data.members.filter(m=>m.id!==id); save(); render();
-}
-function clearMember(){memberId.value="";memberNameInput.value="";memberParty.value="";memberArea.value="";memberInterest.value="";memberNote.value=""}
-const memberNameInput=document.getElementById("memberName");
-function renderMembers(){
- memberList.innerHTML=data.members.length?`<table><tr><th>의원</th><th>지역</th><th>관심분야</th><th>관리</th></tr>${data.members.map(m=>`<tr><td><b>${h(m.name)}</b><br>${h(m.party)}</td><td>${h(m.area)}</td><td>${h(m.interest)}</td><td><button class="subbtn" onclick="editMember('${m.id}')">수정</button> <button class="danger" onclick="deleteMember('${m.id}')">삭제</button></td></tr>`).join("")}</table>`:"등록된 의원이 없습니다.";
-}
-
-function saveItem(){
- const id=itemId.value||uid();
- const it={id,memberId:itemMember.value,type:itemType.value,status:itemStatus.value,title:itemTitle.value.trim(),area:itemArea.value.trim(),field:itemField.value,priority:itemPriority.value,body:itemBody.value.trim(),need:itemNeed.value.trim(),action:itemAction.value.trim(),dept:itemDept.value.trim(),source:itemSource.value.trim(),tags:itemTags.value.trim(),date:today()};
- if(!it.memberId){alert("의원을 먼저 등록하고 선택하세요.");return}
- if(!it.title){alert("제목을 입력하세요.");return}
- const idx=data.items.findIndex(x=>x.id===id);
- if(idx>=0)data.items[idx]=it; else data.items.push(it);
- save(); clearItem(); render(); showById("list");
-}
-function editItem(id){
- const it=data.items.find(x=>x.id===id); if(!it)return;
- itemId.value=it.id; itemMember.value=it.memberId; itemType.value=it.type; itemStatus.value=it.status; itemTitle.value=it.title; itemArea.value=it.area||""; itemField.value=it.field||"문화정책"; itemPriority.value=it.priority||"중"; itemBody.value=it.body||""; itemNeed.value=it.need||""; itemAction.value=it.action||""; itemDept.value=it.dept||""; itemSource.value=it.source||""; itemTags.value=it.tags||"";
- showById("input");
-}
-function deleteItem(id){
- if(!confirm("자료를 삭제할까요?"))return;
- data.items=data.items.filter(x=>x.id!==id); save(); render();
-}
-function clearItem(){
- ["itemId","itemTitle","itemArea","itemBody","itemNeed","itemAction","itemDept","itemSource","itemTags"].forEach(id=>document.getElementById(id).value="");
- itemStatus.value="자료수집 전"; itemPriority.value="중";
-}
-
-function renderList(){
- const mid=filterMember.value, typ=filterType.value, kw=(keyword.value||"").toLowerCase();
- const rows=data.items.filter(x=>(!mid||x.memberId===mid)&&(!typ||x.type===typ)&&(!kw||[x.title,x.body,x.need,x.action,x.dept,x.tags,memberName(x.memberId)].join(" ").toLowerCase().includes(kw)));
- itemList.innerHTML=rows.length?`<table><tr><th>의원</th><th>구분</th><th>제목·내용</th><th>후속조치</th><th>상태</th><th>관리</th></tr>${rows.map(x=>`<tr><td>${h(memberName(x.memberId))}</td><td><span class="pill">${h(x.type)}</span><br>우선 ${h(x.priority)}</td><td><b>${h(x.title)}</b><br>${h(x.body)}</td><td>${h(x.action||x.need)}</td><td>${h(x.status)}</td><td><button class="subbtn" onclick="editItem('${x.id}')">수정</button> <button class="danger" onclick="deleteItem('${x.id}')">삭제</button></td></tr>`).join("")}</table>`:"자료가 없습니다.";
-}
-
-function renderMemberSummary(){
- const id=selectedMember(), m=data.members.find(x=>x.id===id);
- if(!m){memberSummary.innerHTML="의원을 먼저 등록하세요.";return}
- const items=data.items.filter(x=>x.memberId===id);
- const count=t=>items.filter(x=>x.type===t).length;
- memberSummary.innerHTML=`<div class="card"><h3>${h(m.name)} 의원</h3><p>${h(m.party)} · ${h(m.area)}</p><p><b>관심분야</b> ${h(m.interest||"작성 필요")}</p><p><b>유의사항</b> ${h(m.note||"작성 필요")}</p></div>
- <div class="grid3"><div class="card">지역현안<br><b>${count("지역현안")}건</b></div><div class="card">공약<br><b>${count("공약")}건</b></div><div class="card">민원<br><b>${count("민원")}건</b></div></div>
- <h3>최근 자료</h3>${smallTable(items.slice(-6).reverse())}`;
-}
-function smallTable(items){
- return items.length?`<table><tr><th>구분</th><th>제목</th><th>상태</th></tr>${items.map(x=>`<tr><td>${h(x.type)}</td><td>${h(x.title)}</td><td>${h(x.status)}</td></tr>`).join("")}</table>`:"자료가 없습니다.";
-}
-
-function makeReport(){
- const id=reportMember.value||selectedMember(), m=data.members.find(x=>x.id===id);
- if(!m){alert("의원을 먼저 등록하세요.");return}
- const items=data.items.filter(x=>x.memberId===id);
- const pick=t=>items.filter(x=>x.type===t).slice(0,4);
- const next=items.filter(x=>x.status!=="완료").map(x=>x.action||x.need||x.title).filter(Boolean).slice(0,5);
- reportBox.innerHTML=`<h2>${h(m.name)} 의원 의정활동 1쪽 보고</h2>
- <table><tr><th>지역</th><td>${h(m.area)}</td><th>작성일</th><td>${today()}</td></tr><tr><th>관심분야</th><td colspan="3">${h(m.interest||"작성 필요")}</td></tr></table>
- <h3>1. 의정활동 기본 방향</h3><p>지방의회는 주민의 대의기관으로서 조례, 예산, 결산, 행정사무감사, 청원 처리 등을 통해 주민 의견을 행정에 반영한다. 정책지원은 자료수집, 현안분석, 질의·발언·조례·간담회 등으로 연결한다.</p>
- <h3>2. 관리 현황</h3><table><tr><th>지역현안</th><td>${pick("지역현안").length}건</td><th>공약</th><td>${pick("공약").length}건</td><th>민원</th><td>${pick("민원").length}건</td></tr></table>
- <h3>3. 우선 과제</h3>${reportTable([...pick("지역현안"),...pick("공약"),...pick("민원")])}
- <h3>4. 다음 조치</h3><p>${next.length?next.map((x,i)=>`${i+1}. ${h(x)}`).join("<br>"):"1. 의원 면담 후 지역현안·공약·민원을 입력<br>2. 공식 공약자료 출처 확인<br>3. 필요한 자료요구와 부서협의 진행"}</p>
- <h3>5. 유의사항</h3><p>민원은 개인정보를 제외하고 관리한다. 공약은 선거관리위원회, 경기도의회, 선거공보 등 공식 출처 확인 후 원문과 출처를 함께 보관한다.</p>`;
- showById("report");
-}
-function reportTable(items){
- return items.length?`<table><tr><th>구분</th><th>과제</th><th>관리 방향</th></tr>${items.map(x=>`<tr><td>${h(x.type)}</td><td>${h(x.title)}</td><td>${h(x.action||x.need||"자료수집")}</td></tr>`).join("")}</table>`:"등록된 과제가 없습니다.";
-}
-function copyReport(){navigator.clipboard.writeText(reportBox.innerText).then(()=>alert("복사했습니다."))}
-function exportData(){
- const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
- const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="의원지원시스템_백업_"+today()+".json"; a.click();
-}
-function importData(e){
- const f=e.target.files[0]; if(!f)return;
- const r=new FileReader(); r.onload=()=>{try{data=JSON.parse(r.result);save();render();alert("복원했습니다.")}catch{alert("파일 형식이 맞지 않습니다.")}}; r.readAsText(f);
-}
-function showById(id){
- document.querySelectorAll("section").forEach(s=>s.classList.remove("activeSec"));
- document.getElementById(id).classList.add("activeSec");
-}
-render();
-</script>
-</body>
-</html>
+const KEY="ggcAssemblySupportV2",CONFIG_KEY="ggcAssemblySupabaseConfig",OLD_KEYS=["ggcMemberSupportData","ggcAssemblySupportV1"];let state=loadLocal(),sb=null,currentUser=null;
+function blankState(){return{members:[],items:[],reports:{}}}function normalizeState(x){x=x||blankState();if(!x.members)x.members=[];if(!x.items)x.items=[];if(!x.reports)x.reports={};return x}function loadLocal(){try{const cur=localStorage.getItem(KEY);if(cur)return normalizeState(JSON.parse(cur));for(const k of OLD_KEYS){const old=localStorage.getItem(k);if(old){const migrated=normalizeState(JSON.parse(old));localStorage.setItem(KEY,JSON.stringify(migrated));return migrated}}return blankState()}catch{return blankState()}}function saveLocal(){localStorage.setItem(KEY,JSON.stringify(state))}function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}function today(){return new Date().toISOString().slice(0,10)}function h(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}function val(id){return document.getElementById(id).value}function setVal(id,v){document.getElementById(id).value=v||""}function selectedMember(){return currentMember.value||state.members[0]?.id||""}function memberName(id){return state.members.find(m=>m.id===id)?.name||"미지정"}
+function show(id,btn){document.querySelectorAll("section").forEach(s=>s.classList.remove("activeSec"));document.getElementById(id).classList.add("activeSec");document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));if(btn)btn.classList.add("active");render()}function showById(id){document.querySelectorAll("section").forEach(s=>s.classList.remove("activeSec"));document.getElementById(id).classList.add("activeSec")}
+function render(){renderSelects();renderMembers();renderMemberSummary();renderList();renderReportSource();updateCloudBadge()}function renderSelects(){const opts=state.members.map(m=>`<option value="${m.id}">${h(m.name)} (${h(m.area||"지역 미입력")})</option>`).join("");["currentMember","itemMember","reportMember","sourceMember"].forEach(id=>{const el=document.getElementById(id);if(!el)return;const cur=el.value;el.innerHTML=opts;el.value=cur||selectedMember()});const el=filterMember;if(el){const cur=el.value;el.innerHTML='<option value="">전체</option>'+opts;el.value=cur||""}}
+function saveMember(){const id=val("memberId")||uid();const m={id,name:val("memberName").trim(),party:val("memberParty").trim(),committee:val("memberCommittee").trim(),area:val("memberArea").trim(),interest:val("memberInterest").trim(),policyDirection:val("memberPolicyDirection").trim(),note:val("memberNote").trim(),updatedAt:new Date().toISOString()};if(!m.name){alert("의원명을 입력하세요.");return}const idx=state.members.findIndex(x=>x.id===id);if(idx>=0)state.members[idx]=m;else state.members.push(m);saveLocal();clearMember();render()}function editMember(id){const m=state.members.find(x=>x.id===id);if(!m)return;["memberId","memberName","memberParty","memberCommittee","memberArea","memberInterest","memberPolicyDirection","memberNote"].forEach(k=>{});setVal("memberId",m.id);setVal("memberName",m.name);setVal("memberParty",m.party);setVal("memberCommittee",m.committee);setVal("memberArea",m.area);setVal("memberInterest",m.interest);setVal("memberPolicyDirection",m.policyDirection);setVal("memberNote",m.note);showById("members")}function deleteMember(id){if(!confirm("의원을 삭제할까요? 관련 자료는 남지만 의원명이 미지정으로 표시될 수 있습니다."))return;state.members=state.members.filter(m=>m.id!==id);saveLocal();render()}function clearMember(){["memberId","memberName","memberParty","memberCommittee","memberArea","memberInterest","memberPolicyDirection","memberNote"].forEach(id=>setVal(id,""))}function renderMembers(){memberList.innerHTML=state.members.length?`<table><tr><th>의원</th><th>상임위·지역</th><th>관심분야</th><th>관리</th></tr>${state.members.map(m=>`<tr><td><b>${h(m.name)}</b><br>${h(m.party)}</td><td>${h(m.committee)}<br>${h(m.area)}</td><td>${h(m.interest)}</td><td><button class="subbtn" onclick="editMember('${m.id}')">수정</button> <button class="danger" onclick="deleteMember('${m.id}')">삭제</button></td></tr>`).join("")}</table>`:"등록된 의원이 없습니다."}
+function saveItem(){const id=val("itemId")||uid();const it={id,memberId:val("itemMember"),type:val("itemType"),activityDate:val("activityDate")||today(),status:val("itemStatus"),title:val("itemTitle").trim(),activityType:val("activityType"),area:val("itemArea").trim(),field:val("itemField"),priority:val("itemPriority"),body:val("itemBody").trim(),coreAchievement:val("coreAchievement").trim(),residentEffect:val("residentEffect").trim(),need:val("itemNeed").trim(),action:val("itemAction").trim(),deptResponse:val("deptResponse").trim(),futurePlan:val("futurePlan").trim(),dept:val("itemDept").trim(),source:val("itemSource").trim(),mediaLinks:val("mediaLinks").trim(),tags:val("itemTags").trim(),reportReflected:val("reportReflected"),reportReady:val("reportReady")==="true",updatedAt:new Date().toISOString()};if(!it.memberId){alert("의원을 먼저 등록하고 선택하세요.");return}if(!it.title){alert("제목을 입력하세요.");return}const idx=state.items.findIndex(x=>x.id===id);if(idx>=0)state.items[idx]=it;else state.items.push(it);saveLocal();clearItem();render();showById("list")}function editItem(id){const it=state.items.find(x=>x.id===id);if(!it)return;setVal("itemId",it.id);setVal("itemMember",it.memberId);setVal("itemType",it.type);setVal("activityDate",it.activityDate);setVal("itemStatus",it.status);setVal("itemTitle",it.title);setVal("activityType",it.activityType);setVal("itemArea",it.area);setVal("itemField",it.field);setVal("itemPriority",it.priority);setVal("itemBody",it.body);setVal("coreAchievement",it.coreAchievement);setVal("residentEffect",it.residentEffect);setVal("itemNeed",it.need);setVal("itemAction",it.action);setVal("deptResponse",it.deptResponse);setVal("futurePlan",it.futurePlan);setVal("itemDept",it.dept);setVal("itemSource",it.source);setVal("mediaLinks",it.mediaLinks);setVal("itemTags",it.tags);setVal("reportReflected",it.reportReflected||"미반영");setVal("reportReady",it.reportReady?"true":"false");showById("input")}function deleteItem(id){if(!confirm("자료를 삭제할까요?"))return;state.items=state.items.filter(x=>x.id!==id);saveLocal();render()}function clearItem(){["itemId","itemTitle","itemArea","itemBody","coreAchievement","residentEffect","itemNeed","itemAction","deptResponse","futurePlan","itemDept","itemSource","mediaLinks","itemTags"].forEach(id=>setVal(id,""));setVal("activityDate",today());itemStatus.value="자료수집 전";itemPriority.value="중";reportReflected.value="미반영";reportReady.value="true"}
+function renderMemberSummary(){const id=selectedMember(),m=state.members.find(x=>x.id===id);if(!m){memberSummary.innerHTML="<p>의원을 먼저 등록하세요.</p>";return}const items=state.items.filter(x=>x.memberId===id),count=t=>items.filter(x=>x.type===t).length,pending=items.filter(x=>x.status!=="완료").length,ready=items.filter(x=>x.reportReady&&x.reportReflected!=="반영완료").length;memberSummary.innerHTML=`<div class="card"><h3>${h(m.name)} 의원</h3><p>${h(m.party)} · ${h(m.committee)} · ${h(m.area)}</p><p><b>주요 관심분야</b> ${h(m.interest||"작성 필요")}</p><p><b>정책지원 방향</b> ${h(m.policyDirection||"작성 필요")}</p><p><b>자료 선호·유의사항</b> ${h(m.note||"작성 필요")}</p></div><div class="grid4"><div class="card">지역현안<br><span class="stat">${count("지역현안")}</span>건</div><div class="card">공약<br><span class="stat">${count("공약")}</span>건</div><div class="card">민원<br><span class="stat">${count("민원")}</span>건</div><div class="card">보고서 활용대상<br><span class="stat">${ready}</span>건</div></div><div class="card"><b>미완료 과제</b> ${pending}건</div><h3>최근 입력자료</h3>${smallTable(items.slice(-7).reverse())}`}function smallTable(items){return items.length?`<table><tr><th>일자</th><th>구분</th><th>제목</th><th>상태</th><th>보고서</th></tr>${items.map(x=>`<tr><td>${h(x.activityDate)}</td><td>${h(x.type)}</td><td>${h(x.title)}</td><td>${h(x.status)}</td><td>${h(x.reportReflected)}</td></tr>`).join("")}</table>`:"자료가 없습니다."}
+function renderList(){const mid=filterMember.value,typ=filterType.value,rp=filterReport.value,kw=(keyword.value||"").toLowerCase();const rows=state.items.filter(x=>(!mid||x.memberId===mid)&&(!typ||x.type===typ)&&(!rp||x.reportReflected===rp)&&(!kw||[x.title,x.body,x.coreAchievement,x.residentEffect,x.need,x.action,x.dept,x.tags,memberName(x.memberId)].join(" ").toLowerCase().includes(kw)));itemList.innerHTML=rows.length?`<table><tr><th>일자</th><th>의원</th><th>구분·유형</th><th>제목·성과</th><th>후속조치</th><th>상태</th><th>관리</th></tr>${rows.map(x=>`<tr><td>${h(x.activityDate)}</td><td>${h(memberName(x.memberId))}</td><td><span class="pill">${h(x.type)}</span><br>${h(x.activityType)}<br>우선 ${h(x.priority)}</td><td><b>${h(x.title)}</b><br>${h(x.coreAchievement||x.body)}</td><td>${h(x.futurePlan||x.action||x.need)}</td><td>${statusPill(x.status)}<br>${statusPill(x.reportReflected)}</td><td><button class="subbtn" onclick="editItem('${x.id}')">수정</button> <button class="danger" onclick="deleteItem('${x.id}')">삭제</button></td></tr>`).join("")}</table>`:"자료가 없습니다."}function statusPill(s){let cls=s==="완료"||s==="반영완료"?"green":s==="답변대기"||s==="반영대상"?"yellow":s==="보류"?"red":"";return `<span class="pill ${cls}">${h(s)}</span>`}
+function renderReportSource(){const id=sourceMember.value||selectedMember();const rows=state.items.filter(x=>x.memberId===id&&x.reportReady).sort((a,b)=>(a.activityDate||"").localeCompare(b.activityDate||""));reportSourceList.innerHTML=rows.length?`<table><tr><th>일자</th><th>유형</th><th>활동명</th><th>핵심 성과</th><th>주민 체감 효과</th><th>향후 계획</th><th>관리</th></tr>${rows.map(x=>`<tr><td>${h(x.activityDate)}</td><td>${h(x.activityType)}</td><td><b>${h(x.title)}</b><br>${h(x.type)} · ${h(x.field)}</td><td>${h(x.coreAchievement)}</td><td>${h(x.residentEffect)}</td><td>${h(x.futurePlan)}</td><td><button class="subbtn" onclick="editItem('${x.id}')">수정</button></td></tr>`).join("")}</table>`:"보고서 자료함에 포함된 자료가 없습니다."}function buildReportSourceText(){const id=sourceMember.value||selectedMember(),m=state.members.find(x=>x.id===id),rows=state.items.filter(x=>x.memberId===id&&x.reportReady).sort((a,b)=>(a.activityDate||"").localeCompare(b.activityDate||""));if(!m){sourceText.innerText="의원을 먼저 등록하세요.";return}if(!rows.length){sourceText.innerText="보고서 자료함에 포함된 자료가 없습니다.";return}const lines=[`${m.name} 의원 의정활동보고서 기초자료`,`지역구: ${m.area||""}`,""];rows.forEach((x,i)=>{lines.push(`${i+1}. ${x.title}`);lines.push(`- 활동일자/유형: ${x.activityDate||""} / ${x.activityType||""}`);if(x.body)lines.push(`- 추진 배경·내용: ${x.body}`);if(x.coreAchievement)lines.push(`- 핵심 성과: ${x.coreAchievement}`);if(x.residentEffect)lines.push(`- 주민 체감 효과: ${x.residentEffect}`);if(x.futurePlan)lines.push(`- 향후 계획: ${x.futurePlan}`);lines.push("")});sourceText.innerText=lines.join("\n")}function copySourceText(){navigator.clipboard.writeText(sourceText.innerText).then(()=>alert("보고서용 문장을 복사했습니다."))}
+function reportKey(){return reportMember.value||selectedMember()||"default"}function makeReport(){const id=reportMember.value||selectedMember(),m=state.members.find(x=>x.id===id);if(!m){alert("의원을 먼저 등록하세요.");return}const rows=state.items.filter(x=>x.memberId===id&&x.reportReady).sort((a,b)=>(a.activityDate||"").localeCompare(b.activityDate||"")),typeCount=t=>state.items.filter(x=>x.memberId===id&&x.type===t).length,top=rows.slice(0,8);reportBox.innerHTML=`<h2>${h(m.name)} 의원 의정활동보고서 초안</h2><table><tr><th>지역구</th><td>${h(m.area)}</td><th>상임위</th><td>${h(m.committee)}</td><th>작성일</th><td>${today()}</td></tr></table><h3>1. 의정활동 방향</h3><p>${h(m.name)} 의원은 ${h(m.area||"지역")}의 주요 현안과 주민 요구를 문화·체육·관광 정책과 연결하여 실질적인 정책성과로 이어가기 위해 의정활동을 추진하고 있다. 주요 관심분야는 ${h(m.interest||"추가 정리 필요")}이며, 정책지원 방향은 ${h(m.policyDirection||"추가 정리 필요")}이다.</p><h3>2. 관리자료 현황</h3><table><tr><th>지역현안</th><td>${typeCount("지역현안")}건</td><th>공약</th><td>${typeCount("공약")}건</td><th>민원</th><td>${typeCount("민원")}건</td><th>활동자료</th><td>${typeCount("활동자료")}건</td></tr></table><h3>3. 주요 의정활동 및 성과</h3>${reportRows(top)}<h3>4. 향후 추진계획</h3><p>${h(makeFuturePlan(rows))}</p><h3>5. 보고서 작성 메모</h3><p>사진, 보도자료 링크, 담당부서 답변, 후속 자료요구 결과를 확인하여 최종 보고서에 반영한다.</p>`;autoSaveReport();showById("report")}function reportRows(rows){if(!rows.length)return "<p>보고서 자료함에 포함된 자료가 없습니다. `자료 입력`에서 보고서 자료함 포함을 선택하세요.</p>";return `<table><tr><th>일자</th><th>활동명</th><th>핵심 성과</th><th>주민 체감 효과</th></tr>${rows.map(x=>`<tr><td>${h(x.activityDate)}</td><td><b>${h(x.title)}</b><br>${h(x.activityType)} · ${h(x.field)}</td><td>${h(x.coreAchievement||x.body)}</td><td>${h(x.residentEffect||x.futurePlan)}</td></tr>`).join("")}</table>`}function makeFuturePlan(rows){const plans=rows.map(x=>x.futurePlan||x.action).filter(Boolean).slice(0,5);return plans.length?plans.map((p,i)=>`${i+1}. ${p}`).join(" "):"담당 부서 자료요구, 현장 확인, 예산 반영 여부 점검, 보도자료·카드뉴스 연계를 순차적으로 추진한다."}function autoSaveReport(){state.reports[reportKey()]={id:reportKey(),html:reportBox.innerHTML,updatedAt:new Date().toISOString()};saveLocal()}function saveEditedReport(){autoSaveReport();alert("보고서 수정본을 저장했습니다.")}function loadEditedReport(){const r=state.reports[reportKey()];if(r&&r.html){reportBox.innerHTML=r.html;alert("저장된 수정본을 불러왔습니다.")}else alert("저장된 수정본이 없습니다.")}function copyReport(){navigator.clipboard.writeText(reportBox.innerText).then(()=>alert("보고서를 복사했습니다."))}
+function exportData(){const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="의원지원시스템_백업_"+today()+".json";a.click()}function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);if(!state.reports)state.reports={};saveLocal();render();alert("복원했습니다.")}catch{alert("파일 형식이 맞지 않습니다.")}};r.readAsText(f)}
+function loadSupabaseConfig(){try{const c=JSON.parse(localStorage.getItem(CONFIG_KEY))||{};setVal("supabaseUrl",c.url||"");setVal("supabaseAnonKey",c.key||"");if(c.url&&c.key)initSupabase(c.url,c.key)}catch{}}function saveSupabaseConfig(){const c={url:val("supabaseUrl").trim(),key:val("supabaseAnonKey").trim()};if(!c.url||!c.key){alert("URL과 anon/public key를 입력하세요.");return}localStorage.setItem(CONFIG_KEY,JSON.stringify(c));initSupabase(c.url,c.key);alert("Supabase 연결정보를 저장했습니다.")}function initSupabase(url,key){try{sb=window.supabase.createClient(url,key);supabaseStatus.innerText="연결정보 저장됨";sb.auth.getSession().then(({data})=>{currentUser=data.session?.user||null;updateAuthStatus();updateCloudBadge()})}catch(e){supabaseStatus.innerText="초기화 오류: "+e.message}}async function testSupabase(){if(!sb){saveSupabaseConfig();if(!sb)return}const {error}=await sb.from("assembly_support_records").select("id").limit(1);supabaseStatus.innerText=error?("테스트 실패: "+error.message):"연결 성공"}async function signUp(){if(!sb){alert("먼저 연결정보를 저장하세요.");return}const {data,error}=await sb.auth.signUp({email:val("authEmail"),password:val("authPassword")});if(error)alert(error.message);else{currentUser=data.user;updateAuthStatus();alert("회원가입을 완료했습니다. 이메일 확인이 필요한 경우 메일을 확인하세요.")}}async function signIn(){if(!sb){alert("먼저 연결정보를 저장하세요.");return}const {data,error}=await sb.auth.signInWithPassword({email:val("authEmail"),password:val("authPassword")});if(error)alert(error.message);else{currentUser=data.user;updateAuthStatus();updateCloudBadge();alert("로그인했습니다.")}}async function signOut(){if(!sb)return;await sb.auth.signOut();currentUser=null;updateAuthStatus();updateCloudBadge()}function updateAuthStatus(){authStatus.innerText=currentUser?`로그인: ${currentUser.email}`:"로그인 전"}function updateCloudBadge(){cloudBadge.className="pill "+(currentUser?"green":"yellow");cloudBadge.innerText=currentUser?"Supabase 연결됨":"로컬 저장"}function ensureCloud(){if(!sb){alert("Supabase 연결정보를 먼저 저장하세요.");return false}if(!currentUser){alert("Supabase에 로그인하세요.");return false}return true}function recordsForCloud(){const records=[];state.members.forEach(m=>records.push({id:m.id,user_id:currentUser.id,kind:"member",payload:m,updated_at:m.updatedAt||new Date().toISOString()}));state.items.forEach(it=>records.push({id:it.id,user_id:currentUser.id,kind:"item",payload:it,updated_at:it.updatedAt||new Date().toISOString()}));Object.values(state.reports||{}).forEach(r=>records.push({id:"report_"+r.id,user_id:currentUser.id,kind:"report",payload:r,updated_at:r.updatedAt||new Date().toISOString()}));return records}async function syncToCloud(){if(!ensureCloud())return;const records=recordsForCloud();if(!records.length){alert("저장할 자료가 없습니다.");return}const {error}=await sb.from("assembly_support_records").upsert(records,{onConflict:"id"});if(error)alert("저장 실패: "+error.message);else alert("Supabase에 저장했습니다.")}async function syncFromCloud(){if(!ensureCloud())return;const {data,error}=await sb.from("assembly_support_records").select("*").order("updated_at",{ascending:true});if(error){alert("불러오기 실패: "+error.message);return}const next=blankState();data.forEach(r=>{if(r.kind==="member")next.members.push(r.payload);if(r.kind==="item")next.items.push(r.payload);if(r.kind==="report")next.reports[r.payload.id]=r.payload});state=next;saveLocal();render();alert("Supabase 자료를 불러왔습니다.")}
+clearItem();loadSupabaseConfig();render();
+</script></body></html>
