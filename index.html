@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>의원 의정활동 지원 시스템</title>
+<style>
+body{margin:0;font-family:Malgun Gothic,Noto Sans KR,sans-serif;background:#eef3f8;color:#172033}
+header{background:#14356b;color:white;padding:18px 22px}
+h1{margin:0;font-size:24px} .sub{margin:6px 0 0;color:#dbe8f7;font-size:14px}
+.wrap{display:grid;grid-template-columns:240px 1fr;gap:14px;padding:14px}
+aside,main{background:white;border:1px solid #d7e0ec;border-radius:10px;padding:14px}
+button,input,textarea,select{font:inherit}
+button{border:0;border-radius:8px;background:#14356b;color:white;padding:9px 12px;font-weight:700;cursor:pointer}
+button.subbtn{background:#edf3fa;color:#14356b}
+button.danger{background:#fff0f2;color:#b4233a}
+.nav button{display:block;width:100%;margin:0 0 7px;text-align:left}
+.nav button.active{background:#2563a8}
+section{display:none}.activeSec{display:block}
+label{font-weight:700;display:block;margin:10px 0 5px}
+input,textarea,select{width:100%;box-sizing:border-box;border:1px solid #ccd7e6;border-radius:8px;padding:9px}
+textarea{min-height:78px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #d7e0ec;padding:8px;text-align:left;vertical-align:top;font-size:13px}
+th{background:#f0f4fa}
+.card{border:1px solid #d7e0ec;border-radius:10px;padding:12px;margin:8px 0;background:#fbfcfe}
+.pill{display:inline-block;background:#edf3fa;border-radius:999px;padding:3px 8px;margin:2px;font-size:12px;font-weight:700}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.report{background:white;border:1px solid #d7e0ec;border-radius:10px;padding:14px;line-height:1.6}
+.notice{background:#f5f9ff;border:1px solid #cfe0f6;border-radius:9px;padding:10px;margin:8px 0 12px;font-size:13px}
+@media(max-width:850px){.wrap,.grid2,.grid3{grid-template-columns:1fr}}
+@media print{header,aside,.noPrint{display:none}.wrap{display:block;padding:0}main{border:0}.report{border:0}}
+</style>
+</head>
+<body>
+<header>
+<h1>의원 의정활동 지원 시스템</h1>
+<p class="sub">의원별 지역현안·공약·민원·활동자료를 누적 관리하고 1쪽 보고서를 생성합니다.</p>
+</header>
+
+<div class="wrap">
+<aside class="noPrint">
+<div class="nav">
+<button onclick="show('memberPage')" class="active">의원별 페이지</button>
+<button onclick="show('members')">의원 관리</button>
+<button onclick="show('input')">자료 입력</button>
+<button onclick="show('list')">전체 목록</button>
+<button onclick="show('report')">보고서</button>
+<button onclick="show('backup')">백업/복원</button>
+</div>
+<div class="card">
+<label>의원 선택</label>
+<select id="currentMember" onchange="render()"></select>
+</div>
+</aside>
+
+<main>
+<section id="memberPage" class="activeSec">
+<h2>의원별 페이지</h2>
+<div id="memberSummary"></div>
+</section>
+
+<section id="members">
+<h2>의원 관리</h2>
+<div class="grid2">
+<div>
+<input id="memberId" type="hidden">
+<label>의원명</label><input id="memberName">
+<label>정당</label><input id="memberParty">
+<label>지역구</label><input id="memberArea" placeholder="예: 남양주3, 진접 / 오산">
+<label>관심분야</label><textarea id="memberInterest"></textarea>
+<label>자료 선호·유의사항</label><textarea id="memberNote"></textarea>
+<div class="toolbar">
+<button onclick="saveMember()">의원 저장</button>
+<button class="subbtn" onclick="clearMember()">초기화</button>
+</div>
+</div>
+<div>
+<h3>등록 의원</h3>
+<div id="memberList"></div>
+</div>
+</div>
+</section>
+
+<section id="input">
+<h2>자료 입력</h2>
+<div class="notice">민원은 개인정보를 넣지 말고 민원번호·요지·지역·부서·처리상태 중심으로 기록하세요.</div>
+<input id="itemId" type="hidden">
+<div class="grid3">
+<div><label>의원</label><select id="itemMember"></select></div>
+<div><label>구분</label><select id="itemType"><option>지역현안</option><option>공약</option><option>민원</option><option>활동자료</option></select></div>
+<div><label>상태</label><select id="itemStatus"><option>자료수집 전</option><option>검토중</option><option>진행중</option><option>답변대기</option><option>완료</option><option>보류</option></select></div>
+</div>
+<label>제목</label><input id="itemTitle">
+<div class="grid3">
+<div><label>관련 지역</label><input id="itemArea"></div>
+<div><label>분야</label><select id="itemField"><option>문화정책</option><option>관광정책</option><option>체육정책</option><option>문화유산</option><option>콘텐츠·예술</option><option>예산·결산</option><option>행정사무감사</option><option>기타</option></select></div>
+<div><label>우선순위</label><select id="itemPriority"><option>상</option><option>중</option><option>하</option></select></div>
+</div>
+<label>내용</label><textarea id="itemBody" placeholder="현안 배경, 공약 원문, 민원 요지, 활동내용 등을 입력"></textarea>
+<div class="grid2">
+<div><label>필요자료·확인사항</label><textarea id="itemNeed"></textarea></div>
+<div><label>후속조치·의정활동 연결</label><textarea id="itemAction" placeholder="자료요구, 질의서, 5분발언, 조례, 간담회, 현장방문 등"></textarea></div>
+</div>
+<div class="grid3">
+<div><label>관련 부서·기관</label><input id="itemDept"></div>
+<div><label>출처 URL·파일명</label><input id="itemSource"></div>
+<div><label>태그</label><input id="itemTags"></div>
+</div>
+<div class="toolbar">
+<button onclick="saveItem()">자료 저장</button>
+<button class="subbtn" onclick="clearItem()">초기화</button>
+</div>
+</section>
+
+<section id="list">
+<h2>전체 목록</h2>
+<div class="grid3 noPrint">
+<div><label>의원 필터</label><select id="filterMember" onchange="renderList()"></select></div>
+<div><label>구분 필터</label><select id="filterType" onchange="renderList()"><option value="">전체</option><option>지역현안</option><option>공약</option><option>민원</option><option>활동자료</option></select></div>
+<div><label>검색어</label><input id="keyword" oninput="renderList()"></div>
+</div>
+<div id="itemList"></div>
+</section>
+
+<section id="report">
+<h2>보고서</h2>
+<div class="toolbar noPrint">
+<select id="reportMember"></select>
+<button onclick="makeReport()">의정활동 1쪽 보고 생성</button>
+<button class="subbtn" onclick="copyReport()">보고서 복사</button>
+<button class="subbtn" onclick="window.print()">PDF 저장/인쇄</button>
+</div>
+<div id="reportBox" class="report">의원을 선택하고 보고서를 생성하세요.</div>
+</section>
+
+<section id="backup">
+<h2>백업/복원</h2>
+<div class="notice">자료는 현재 브라우저에 저장됩니다. 중요한 자료는 반드시 백업하세요.</div>
+<div class="toolbar">
+<button onclick="exportData()">자료 백업</button>
+<button class="subbtn" onclick="document.getElementById('importFile').click()">자료 복원</button>
+<input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+</section>
+</main>
+</div>
+
+<script>
+const KEY="ggcMemberSupportData";
+let data=load();
+
+function load(){
+  try{return JSON.parse(localStorage.getItem(KEY))||{members:[],items:[]}}
+  catch{return{members:[],items:[]}}
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function h(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function today(){return new Date().toISOString().slice(0,10)}
+
+function show(id){
+ document.querySelectorAll("section").forEach(s=>s.classList.remove("activeSec"));
+ document.getElementById(id).classList.add("activeSec");
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+ event.target.classList.add("active");
+ render();
+}
+
+function render(){
+ renderSelects(); renderMembers(); renderList(); renderMemberSummary();
+}
+function memberName(id){return data.members.find(m=>m.id===id)?.name||"미지정"}
+function selectedMember(){return document.getElementById("currentMember").value||data.members[0]?.id||""}
+function renderSelects(){
+ const opts=data.members.map(m=>`<option value="${m.id}">${h(m.name)} (${h(m.area||"지역 미입력")})</option>`).join("");
+ ["currentMember","itemMember","filterMember","reportMember"].forEach(id=>{
+   const el=document.getElementById(id); if(!el)return;
+   const cur=el.value;
+   el.innerHTML=(id==="filterMember"?'<option value="">전체</option>':"")+opts;
+   el.value=cur||selectedMember();
+ });
+}
+
+function saveMember(){
+ const id=document.getElementById("memberId").value||uid();
+ const m={id,name:memberNameInput.value.trim(),party:memberParty.value.trim(),area:memberArea.value.trim(),interest:memberInterest.value.trim(),note:memberNote.value.trim()};
+ if(!m.name){alert("의원명을 입력하세요.");return}
+ const idx=data.members.findIndex(x=>x.id===id);
+ if(idx>=0)data.members[idx]=m; else data.members.push(m);
+ save(); clearMember(); render();
+}
+function editMember(id){
+ const m=data.members.find(x=>x.id===id); if(!m)return;
+ memberId.value=m.id; memberNameInput.value=m.name; memberParty.value=m.party||""; memberArea.value=m.area||""; memberInterest.value=m.interest||""; memberNote.value=m.note||"";
+ showById("members");
+}
+function deleteMember(id){
+ if(!confirm("의원을 삭제할까요? 자료는 남지만 의원명이 미지정으로 표시될 수 있습니다."))return;
+ data.members=data.members.filter(m=>m.id!==id); save(); render();
+}
+function clearMember(){memberId.value="";memberNameInput.value="";memberParty.value="";memberArea.value="";memberInterest.value="";memberNote.value=""}
+const memberNameInput=document.getElementById("memberName");
+function renderMembers(){
+ memberList.innerHTML=data.members.length?`<table><tr><th>의원</th><th>지역</th><th>관심분야</th><th>관리</th></tr>${data.members.map(m=>`<tr><td><b>${h(m.name)}</b><br>${h(m.party)}</td><td>${h(m.area)}</td><td>${h(m.interest)}</td><td><button class="subbtn" onclick="editMember('${m.id}')">수정</button> <button class="danger" onclick="deleteMember('${m.id}')">삭제</button></td></tr>`).join("")}</table>`:"등록된 의원이 없습니다.";
+}
+
+function saveItem(){
+ const id=itemId.value||uid();
+ const it={id,memberId:itemMember.value,type:itemType.value,status:itemStatus.value,title:itemTitle.value.trim(),area:itemArea.value.trim(),field:itemField.value,priority:itemPriority.value,body:itemBody.value.trim(),need:itemNeed.value.trim(),action:itemAction.value.trim(),dept:itemDept.value.trim(),source:itemSource.value.trim(),tags:itemTags.value.trim(),date:today()};
+ if(!it.memberId){alert("의원을 먼저 등록하고 선택하세요.");return}
+ if(!it.title){alert("제목을 입력하세요.");return}
+ const idx=data.items.findIndex(x=>x.id===id);
+ if(idx>=0)data.items[idx]=it; else data.items.push(it);
+ save(); clearItem(); render(); showById("list");
+}
+function editItem(id){
+ const it=data.items.find(x=>x.id===id); if(!it)return;
+ itemId.value=it.id; itemMember.value=it.memberId; itemType.value=it.type; itemStatus.value=it.status; itemTitle.value=it.title; itemArea.value=it.area||""; itemField.value=it.field||"문화정책"; itemPriority.value=it.priority||"중"; itemBody.value=it.body||""; itemNeed.value=it.need||""; itemAction.value=it.action||""; itemDept.value=it.dept||""; itemSource.value=it.source||""; itemTags.value=it.tags||"";
+ showById("input");
+}
+function deleteItem(id){
+ if(!confirm("자료를 삭제할까요?"))return;
+ data.items=data.items.filter(x=>x.id!==id); save(); render();
+}
+function clearItem(){
+ ["itemId","itemTitle","itemArea","itemBody","itemNeed","itemAction","itemDept","itemSource","itemTags"].forEach(id=>document.getElementById(id).value="");
+ itemStatus.value="자료수집 전"; itemPriority.value="중";
+}
+
+function renderList(){
+ const mid=filterMember.value, typ=filterType.value, kw=(keyword.value||"").toLowerCase();
+ const rows=data.items.filter(x=>(!mid||x.memberId===mid)&&(!typ||x.type===typ)&&(!kw||[x.title,x.body,x.need,x.action,x.dept,x.tags,memberName(x.memberId)].join(" ").toLowerCase().includes(kw)));
+ itemList.innerHTML=rows.length?`<table><tr><th>의원</th><th>구분</th><th>제목·내용</th><th>후속조치</th><th>상태</th><th>관리</th></tr>${rows.map(x=>`<tr><td>${h(memberName(x.memberId))}</td><td><span class="pill">${h(x.type)}</span><br>우선 ${h(x.priority)}</td><td><b>${h(x.title)}</b><br>${h(x.body)}</td><td>${h(x.action||x.need)}</td><td>${h(x.status)}</td><td><button class="subbtn" onclick="editItem('${x.id}')">수정</button> <button class="danger" onclick="deleteItem('${x.id}')">삭제</button></td></tr>`).join("")}</table>`:"자료가 없습니다.";
+}
+
+function renderMemberSummary(){
+ const id=selectedMember(), m=data.members.find(x=>x.id===id);
+ if(!m){memberSummary.innerHTML="의원을 먼저 등록하세요.";return}
+ const items=data.items.filter(x=>x.memberId===id);
+ const count=t=>items.filter(x=>x.type===t).length;
+ memberSummary.innerHTML=`<div class="card"><h3>${h(m.name)} 의원</h3><p>${h(m.party)} · ${h(m.area)}</p><p><b>관심분야</b> ${h(m.interest||"작성 필요")}</p><p><b>유의사항</b> ${h(m.note||"작성 필요")}</p></div>
+ <div class="grid3"><div class="card">지역현안<br><b>${count("지역현안")}건</b></div><div class="card">공약<br><b>${count("공약")}건</b></div><div class="card">민원<br><b>${count("민원")}건</b></div></div>
+ <h3>최근 자료</h3>${smallTable(items.slice(-6).reverse())}`;
+}
+function smallTable(items){
+ return items.length?`<table><tr><th>구분</th><th>제목</th><th>상태</th></tr>${items.map(x=>`<tr><td>${h(x.type)}</td><td>${h(x.title)}</td><td>${h(x.status)}</td></tr>`).join("")}</table>`:"자료가 없습니다.";
+}
+
+function makeReport(){
+ const id=reportMember.value||selectedMember(), m=data.members.find(x=>x.id===id);
+ if(!m){alert("의원을 먼저 등록하세요.");return}
+ const items=data.items.filter(x=>x.memberId===id);
+ const pick=t=>items.filter(x=>x.type===t).slice(0,4);
+ const next=items.filter(x=>x.status!=="완료").map(x=>x.action||x.need||x.title).filter(Boolean).slice(0,5);
+ reportBox.innerHTML=`<h2>${h(m.name)} 의원 의정활동 1쪽 보고</h2>
+ <table><tr><th>지역</th><td>${h(m.area)}</td><th>작성일</th><td>${today()}</td></tr><tr><th>관심분야</th><td colspan="3">${h(m.interest||"작성 필요")}</td></tr></table>
+ <h3>1. 의정활동 기본 방향</h3><p>지방의회는 주민의 대의기관으로서 조례, 예산, 결산, 행정사무감사, 청원 처리 등을 통해 주민 의견을 행정에 반영한다. 정책지원은 자료수집, 현안분석, 질의·발언·조례·간담회 등으로 연결한다.</p>
+ <h3>2. 관리 현황</h3><table><tr><th>지역현안</th><td>${pick("지역현안").length}건</td><th>공약</th><td>${pick("공약").length}건</td><th>민원</th><td>${pick("민원").length}건</td></tr></table>
+ <h3>3. 우선 과제</h3>${reportTable([...pick("지역현안"),...pick("공약"),...pick("민원")])}
+ <h3>4. 다음 조치</h3><p>${next.length?next.map((x,i)=>`${i+1}. ${h(x)}`).join("<br>"):"1. 의원 면담 후 지역현안·공약·민원을 입력<br>2. 공식 공약자료 출처 확인<br>3. 필요한 자료요구와 부서협의 진행"}</p>
+ <h3>5. 유의사항</h3><p>민원은 개인정보를 제외하고 관리한다. 공약은 선거관리위원회, 경기도의회, 선거공보 등 공식 출처 확인 후 원문과 출처를 함께 보관한다.</p>`;
+ showById("report");
+}
+function reportTable(items){
+ return items.length?`<table><tr><th>구분</th><th>과제</th><th>관리 방향</th></tr>${items.map(x=>`<tr><td>${h(x.type)}</td><td>${h(x.title)}</td><td>${h(x.action||x.need||"자료수집")}</td></tr>`).join("")}</table>`:"등록된 과제가 없습니다.";
+}
+function copyReport(){navigator.clipboard.writeText(reportBox.innerText).then(()=>alert("복사했습니다."))}
+function exportData(){
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="의원지원시스템_백업_"+today()+".json"; a.click();
+}
+function importData(e){
+ const f=e.target.files[0]; if(!f)return;
+ const r=new FileReader(); r.onload=()=>{try{data=JSON.parse(r.result);save();render();alert("복원했습니다.")}catch{alert("파일 형식이 맞지 않습니다.")}}; r.readAsText(f);
+}
+function showById(id){
+ document.querySelectorAll("section").forEach(s=>s.classList.remove("activeSec"));
+ document.getElementById(id).classList.add("activeSec");
+}
+render();
+</script>
+</body>
+</html>
